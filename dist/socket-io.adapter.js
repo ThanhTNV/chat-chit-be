@@ -10,7 +10,7 @@ class SocketIoAdapter extends platform_socket_io_1.IoAdapter {
         const server = super.createIOServer(port, {
             ...options,
             cors: {
-                origin: 'https://chat-chit-fe-a8918.web.app',
+                origin: 'https://chat-chit-f.web.app/',
                 methods: ['GET', 'POST'],
                 credentials: true,
             },
