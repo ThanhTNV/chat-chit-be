@@ -7,6 +7,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -15,6 +18,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Branch Lint
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          echo running on branch ${{ github.event.pull_request.base_ref }}
+          echo merging branch ${{ github.event.pull_request.head_ref }}
+          BRANCH_NAME= ${{ github.event.pull_request.head_ref }}
+          PATTERN="^(STORY|TASK|BUG|SCRUM|ISSUE)-[0-9]+"
+          if [[ ! $BRANCH_NAME =~ $PATTERN ]]; then
+            echo "Head branch name '$BRANCH_NAME' is not valid"
+            echo "Branch names must include a Jira ticket ID, e.g., PROJ-123-feature-description."
+            exit 1
+          fi
+          echo "Branch name '$BRANCH_NAME' is valid."
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
