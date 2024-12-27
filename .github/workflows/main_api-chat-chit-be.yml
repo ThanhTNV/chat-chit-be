@@ -21,9 +21,9 @@ jobs:
         run: |
           echo running on branch ${GITHUB_REF##*/}
           BRANCH_NAME=${GITHUB_REF##*/}
-          PATTERN="^(STORY|TASK|BUG|SCRUM)-[0-9]+"
+          PATTERN="^(STORY|TASK|BUG|SCRUM|ISSUE)-[0-9]+"
           if [[ ! $BRANCH_NAME =~ $PATTERN ]]; then
-            echo "Branch name is not valid"
+            echo "Branch name '$BRANCH_NAME' is not valid"
             echo "Branch names must include a Jira ticket ID, e.g., PROJ-123-feature-description."
             exit 1
           fi
