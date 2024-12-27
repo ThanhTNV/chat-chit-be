@@ -1,6 +1,7 @@
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -8,7 +9,7 @@ import {
 import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway()
-export class MessageGateway {
+export class MessageGateway implements OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
   @SubscribeMessage('create-room')
@@ -17,19 +18,28 @@ export class MessageGateway {
     @MessageBody() room: string,
   ) {
     client.join(room);
-    client.emit('message-from-server', `Created room ${room}`);
+    this.server.to(room).emit('message-from-server', {
+      message: `${client.id} created the room`,
+    });
   }
 
   @SubscribeMessage('join')
   handleJoin(@ConnectedSocket() client: Socket, @MessageBody() room: string) {
     client.join(room);
-    client.emit('message-from-server', `Joined room ${room}`);
+    console.log(`${client.id} join the room ${room}`);
+    this.server.to(room).emit('message-from-server', {
+      message: `${client.id} joined the room`,
+    });
   }
 
   @SubscribeMessage('leave')
   handleLeave(@ConnectedSocket() client: Socket, @MessageBody() room: string) {
+    const { id } = client;
     client.leave(room);
-    client.emit('message-from-server', `Left room ${room}`);
+    console.log(`${id} leave the room ${room}`);
+    this.server.to(room).emit('message-from-server', {
+      message: `${id} left the room`,
+    });
   }
 
   @SubscribeMessage('invite-to-room')
@@ -43,6 +53,15 @@ export class MessageGateway {
       this.server.in(payload.room).emit('message', {
         user: client.id,
         message: payload.message,
+      });
+    }
+  }
+
+  handleDisconnect(@ConnectedSocket() client: Socket): any {
+    const room = client.rooms[0];
+    if (!!room) {
+      this.server.to(room).emit('message-from-server', {
+        message: `${client.id} left the room`,
       });
     }
   }
