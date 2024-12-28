@@ -11,7 +11,7 @@ export class SocketIoAdapter extends IoAdapter {
     const server = super.createIOServer(port, {
       ...options,
       cors: {
-        origin: 'http://localhost:4200', // || 'https://chat-chit-f.web.app/', // Frontend origin
+        origin: process.env.FE_URL || 'http://localhost:4200', // Frontend origin
         methods: ['GET', 'POST'],
         credentials: true,
       },
